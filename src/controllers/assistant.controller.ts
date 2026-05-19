@@ -29,19 +29,26 @@ export class AssistantController {
       // Registrar la pregunta del estudiante en el historial de conversacion
       conversationHistory.push({ role: 'user', content: text });
 
-      // Consumir el servicio Ollama enviando todo el contexto acumulado
+      // Consumir el servicio Ollama enviando todo el contexto acumulado (incluye el AbortController si usas fetch)
       const assistantResponse = await OllamaService.chat(conversationHistory);
 
       // Registrar la respuesta generada por la IA para mantener el hilo de seguimiento
       conversationHistory.push({ role: 'assistant', content: assistantResponse });
 
-      // Responder exitosamente al cliente con la respuesta estructurada
+      // Responder exitosamente al cliente con la respuesta estructurada de la IA
       res.status(200).json({ response: assistantResponse });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('[ASSISTANT CONTROLLER ERROR]:', error);
+      
+      // Si la peticion fue abortada por el servicio debido a un timeout, se remueve el ultimo mensaje enviado
+      // para evitar corromper el historial con preguntas que no obtuvieron respuesta exitosa
+      if (conversationHistory.length > 1 && conversationHistory[conversationHistory.length - 1].role === 'user') {
+        conversationHistory.pop();
+      }
+
       res.status(500).json({ 
-        error: 'Error interno del servidor al procesar la consulta con el asistente de IA.' 
+        error: error.message || 'Error interno del servidor al procesar la consulta con el asistente de IA.' 
       });
     }
   }
