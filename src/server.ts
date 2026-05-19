@@ -1,21 +1,24 @@
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
+import assistantRoutes from './routes/assistant.routes';
 
-// Cargar las variables de entorno desde el archivo .env
+// Cargar las variables de entorno
 dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para permitir que el servidor entienda formato JSON en las peticiones
+// Middleware para analisis de cuerpos JSON
 app.use(express.json());
 
-// Ruta base de comprobación de estado de la API
+// Vinculacion de las rutas del asistente inteligente bajo el prefijo estandar /api
+app.use('/api', assistantRoutes);
+
+// Ruta de comprobacion de estado
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Servidor Express con TypeScript activo' });
 });
 
-// Inicialización de la escucha del servidor
 app.listen(PORT, () => {
-  console.log(`[SERVER]: Servidor ejecutándose exitosamente en http://localhost:${PORT}`);
+  console.log(`[SERVER]: Servidor ejecutandose exitosamente en http://localhost:${PORT}`);
 });
