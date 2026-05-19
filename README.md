@@ -14,21 +14,39 @@ Este servidor backend desarrollado en Node.js con TypeScript implementa un asist
 3. **Integración de IA**: Se programó un servicio dedicado (`OllamaService`) estructurado para consumir la API de Ollama de forma síncrona pasando un arreglo de mensajes históricos.
 4. **Persistencia**: Se manejó el historial conversacional en memoria volátil dentro del controlador para cumplir con el requerimiento del seguimiento de chat.
 
-## Evidencias de Funcionamiento (Pruebas en Postman)
+## Evidencias de Funcionamiento
 
-### 1. Pregunta Técnica
+### Primera seccion - Estructura del proyecto
+
+**Estructura basica del proyecto**
+![Estructura basica del proyecto](./tarea_capturas_pantalla/estructura_proyecto.PNG)
+
+**Conexion exitosa al servidor**
+![Conexion exitosa al servidor](./tarea_capturas_pantalla/conexion_exitosa_servidor.PNG)
+
+### Segunda seccion - Integración con Ollama
+
+**Integracion con Ollama**
+![Instalacion Ollama](./tarea_capturas_pantalla/descarga_Gemma3_local.PNG)
+
+**Funcionamiento Ollama en servidor**
+![Funcionamiento Ollama](./tarea_capturas_pantalla/funcionamiento_Ollama_servidor.PNG)
+
+### Tercera seccion - Pruebas en Postman
+
+#### 1. Pregunta Técnica
 
 - **Entrada**: Explicación de un closure y un ejemplo sencillo en JavaScript.
 - **Evidencia**:
   ![Prueba Tecnica](./tarea_capturas_pantalla/1_peticion_tecnica_Ollama.PNG)
 
-### 2. Pregunta Creativa
+#### 2. Pregunta Creativa
 
 - **Entrada**: Analogía del mundo real para explicar Promesas y async/await.
 - **Evidencia**:
   ![Prueba Creativa](./tarea_capturas_pantalla/2_peticion_creativa_Ollama.PNG)
 
-### 3. Pregunta de Seguimiento (Prueba de memoria)
+#### 3. Pregunta de Seguimiento (Prueba de memoria)
 
 - **Entrada**: Solicitud de un ejercicio práctico basado en la analogía anterior sin repetir el nombre del concepto.
 - **Evidencia**:
