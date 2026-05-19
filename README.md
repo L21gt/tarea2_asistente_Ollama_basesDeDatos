@@ -20,16 +20,16 @@ Este servidor backend desarrollado en Node.js con TypeScript implementa un asist
 
 - **Entrada**: Explicación de un closure y un ejemplo sencillo en JavaScript.
 - **Evidencia**:
-  ![Prueba Tecnica](./tarea_capturas_pantalla/1_peticion_tecnica_Ollama.png)
+  ![Prueba Tecnica](./tarea_capturas_pantalla/1_peticion_tecnica_Ollama.PNG)
 
 ### 2. Pregunta Creativa
 
 - **Entrada**: Analogía del mundo real para explicar Promesas y async/await.
 - **Evidencia**:
-  ![Prueba Creativa](./tarea_capturas_pantalla/2_peticion_creativa_Ollama.png)
+  ![Prueba Creativa](./tarea_capturas_pantalla/2_peticion_creativa_Ollama.PNG)
 
 ### 3. Pregunta de Seguimiento (Prueba de memoria)
 
 - **Entrada**: Solicitud de un ejercicio práctico basado en la analogía anterior sin repetir el nombre del concepto.
 - **Evidencia**:
-  ![Prueba de Seguimiento](./tarea_capturas_pantalla/3_peticion_seguimiento_Ollama.png)
+  ![Prueba de Seguimiento](./tarea_capturas_pantalla/3_peticion_seguimiento_Ollama.PNG)
