@@ -1,3 +1,4 @@
+import http from 'http';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -8,56 +9,70 @@ export interface ChatMessage {
 }
 
 export class OllamaService {
-  private static baseUrl = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
-
   /**
-   * Envía un historial de mensajes al modelo local de Ollama utilizando fetch nativo
-   * protegido por un mecanismo de AbortController para evitar congelamientos de red.
+   * Consume la API de Ollama utilizando el modulo nativo 'http' con IPv4 estricto.
+   * Esto garantiza la comunicacion local en entornos Windows donde el protocolo IPv6 
+   * causa bloqueos de red silenciosos.
    */
-  public static async chat(messages: ChatMessage[]): Promise<string> {
-    // 1. Instanciar el controlador de aborto nativo
-    const controller = new AbortController();
-    
-    // 2. Configurar un temporizador de seguridad (ej. 15 segundos) 
-    // Si la petición excede este tiempo, se dispara el método .abort()
-    const timeoutId = setTimeout(() => {
-      console.warn('[TIMEOUT]: La peticion a Ollama excedio el tiempo limite. Abortando...');
-      controller.abort();
-    }, 120000);
+  public static chat(messages: ChatMessage[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Concatenacion del contexto de chat en texto plano
+      const promptText = messages.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join('\n') + '\nASSISTANT:';
 
-    try {
-      // 3. Pasar la señal de aborto dentro de las opciones de configuracion del fetch
-      const response = await fetch(`${this.baseUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gemma3',
-          messages: messages,
-          stream: false
-        }),
-        signal: controller.signal // <--- Vinculación crucial de la señal
+      const postData = JSON.stringify({
+        model: 'gemma3',
+        prompt: promptText,
+        stream: false
       });
 
-      if (!response.ok) {
-        throw new Error(`Error en Ollama. Status: ${response.status}`);
-      }
+      // Configuracion del socket blindada contra bloqueos de IPv6
+      const options = {
+        hostname: '127.0.0.1',
+        port: 11434,
+        path: '/api/generate',
+        method: 'POST',
+        family: 4, // <--- LA REGLA DE ORO QUE DESTRABÓ LA RED
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData),
+          'Connection': 'close'
+        },
+        timeout: 60000 // 60 segundos de tolerancia para el modelo
+      };
 
-      const data = await response.json() as { message: { content: string } };
-      return data.message.content;
+      const req = http.request(options, (res) => {
+        let data = '';
 
-    } catch (error: any) {
-      // 4. Capturar especificamente si el error fue provocado por el AbortController
-      if (error.name === 'AbortError') {
-        throw new Error('La solicitud fue cancelada automaticamente porque el servidor local de Ollama tardo demasiado en responder.');
-      }
-      
-      console.error('[OLLAMA SERVICE ERROR]:', error);
-      throw error;
-    } finally {
-      // 5. REGLA DE ORO: Limpiar siempre el temporizador para evitar fugas de memoria en Node.js
-      clearTimeout(timeoutId);
-    }
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            try {
+              // Parseo seguro garantizando el tipado para TypeScript
+              const parsed = JSON.parse(data) as { response: string };
+              resolve(parsed.response);
+            } catch (e) {
+              reject(new Error('Error al decodificar la respuesta JSON de Ollama.'));
+            }
+          } else {
+            reject(new Error(`Ollama respondio con error HTTP: ${res.statusCode}`));
+          }
+        });
+      });
+
+      req.on('error', (e) => {
+        reject(new Error(`Error de conexion: ${e.message}`));
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Timeout: Ollama no respondio en el tiempo establecido.'));
+      });
+
+      req.write(postData);
+      req.end();
+    });
   }
 }
